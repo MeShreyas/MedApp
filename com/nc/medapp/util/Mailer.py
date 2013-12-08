@@ -6,17 +6,24 @@ Created on 05-Dec-2013
 
 from threading import Thread
 from flask.ext.mail import Message
-from com.nc.medapp.controller.ApiEndPoints import mail
 
-#@async    
-def send_async_email(msg):
-    mail.send(msg)
+class Mailer():
     
-def send_email(subject, sender, recipients, text_body, html_body):
-    msg = Message(subject, sender = sender, recipients = recipients)
-    msg.body = text_body
-    msg.html = html_body
-    #send_async_email(msg)
-    thr = Thread(target = send_async_email, args = [msg])
-    thr.start()
+    mail = None
+
+    def __init__(self,mail):
+        self.mail = mail
+        #self.sender  = sender 
+        #self.recipients = recipients
         
+    def send_email(self,subject,  recipients, text_body, html_body):
+    
+        sender= "patilshreyas27@gmail.com";
+        recipients = ["simplychampak@gmail.com"]
+        msg = Message(subject, sender = sender, recipients = recipients)
+        msg.body = text_body
+        msg.html = html_body
+        def send_async_email(msg):
+             self.mail.send(msg)
+        thr = Thread(target = send_async_email, args = [msg])
+        thr.start()

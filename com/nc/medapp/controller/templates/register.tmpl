@@ -1,0 +1,10 @@
+<!doctype html>
+Dear {{user.name}},<br/><br/>
+
+You have been successfully registered for MedApp. Please click the link below or copy it in a browser to activate your account.<br/>
+
+{{url_for("activate", token=user.token, _external = True)}}<br/>
+
+<br/>Regards,<br/>
+
+MedApp Team
