@@ -108,13 +108,6 @@ def sendRegistraionEmail(user,token):
     mailUser['token'] = token
     mailer.send_email("Hello World", None, render_template("register.tmpl",user=mailUser), render_template("register.tmpl",user=mailUser))
     
-# @app.route('/')
-# def helloWorld():
-#     
-#     Mailer.send_email("Hello Workd", "patilshreyas27@gmail.com", "simplychampak@gmail.com", "You Rock", "You Rock")
-#     return "Hello MedApp"
-
-
 if __name__ == '__main__':
     app.run()
     
