@@ -11,7 +11,7 @@ class Speciality(Document):
 
 class User(Document):
     name = StringField(required=True)
-    email = EmailField(required=True)
+    email = EmailField(required=True,primary_key=True)
     password = StringField(required=True)
     speciality = ReferenceField(Speciality,required=True)
     friends = ListField(StringField())

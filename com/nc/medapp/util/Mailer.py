@@ -19,7 +19,7 @@ class Mailer():
     def send_email(self,subject,  recipients, text_body, html_body):
     
         sender= "patilshreyas27@gmail.com";
-        recipients = ["waghman@gmail.com","simplychampak@gmail.com"]
+        recipients = recipients
         msg = Message(subject, sender = sender, recipients = recipients)
         msg.body = text_body
         msg.html = html_body
