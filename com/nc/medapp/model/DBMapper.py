@@ -11,7 +11,7 @@ class Speciality(Document):
 
 class User(Document):
     name = StringField(required=True)
-    email = EmailField(required=True,primary_key=True)
+    email = EmailField(required=True,unique=True)
     password = StringField(required=True)
     speciality = ReferenceField(Speciality,required=True)
     friends = ListField(StringField())
@@ -32,10 +32,4 @@ class Event(Document):
     # TODO: This is where I define my event data object
     pass
 
-
-if __name__ == '__main__' :
-    connect('test')
-    data = User(name="Shreyas",email="This",password="password",speciality='NOSE')
-    data.save()
-    
 

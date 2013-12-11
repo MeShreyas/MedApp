@@ -38,7 +38,6 @@ def login():
     validateJSON(request.json)
     email = request.json['email']
     password = request.json['password']
-    
     user = User.objects(email=email).first()
     if user:
         if user.password == password :
@@ -52,11 +51,11 @@ def login():
             resp = Response(response=ret,status=200,mimetype="application/json",headers=headers)            
             return resp
         else :
-            ret = '{"errorcode":"INVALID PASSWORD"}'
+            ret = '{"status":"INVALID PASSWORD / USER"}'
             resp = Response(response=ret,status=500,mimetype="application/json")
             return resp
     else:
-        ret = '{"status":"INVALID USER"}'
+        ret = '{"status":"INVALID PASSWORD / USER"}'
         resp = Response(response=ret,status=500,mimetype="application/json")
         return resp
 
@@ -71,7 +70,14 @@ def register():
     spec = Speciality.objects(fieldname=speciality).first()
     # Create a user object and save to DB
     user = User(name=name,email=email,password=password,speciality=spec.id)
-    user.save()
+    try:
+        user.save()
+    except NotUniqueError as e:
+        ret = '{"status":"USER ALREADY REGISTERED"}'
+        return Response(response=ret,status=500,mimetype="application/json")
+    except ValidationError as email:
+        ret = '{"status":"EMAIL VALIDATION ERROR"}'
+        return Response(response=ret,status=500,mimetype="application/json")
     # Create and save a temp token
     session = Session(user.id)
     session.save()
@@ -79,7 +85,7 @@ def register():
     # Shoot a registration email
     sendRegistraionEmail(user,token)
     # Return a response
-    ret = '{"status":"User Registered Successfully}'
+    ret = '{"status":"User Registered Successfully"}'
     return Response(response=ret,status=201,mimetype="application/json")
 
 
@@ -104,13 +110,12 @@ def activate(token):
         return json.dumps([{"status":"Token invalid or account is already activated"}])
     else:
         if token == str(tok.id):
-            print str(tok.user.id)
             user = User.objects(id=str(tok.user.id)).first()
             user.enabled=True
             user.save()
             tok.delete()
         else :
-            return json.dumps([{"status":"Invalid token being used for account activation"}])
+            return json.dumps([{"status":"Token invalid or account is already activated"}])
         
     return json.dumps([{"status":"Account activated successfully"}])
 
