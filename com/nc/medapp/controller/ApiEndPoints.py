@@ -42,22 +42,22 @@ def login():
     if user:
         if user.password == password :
             if user.enabled == False:
-                ret = '{"status":"ACCOUNT NOT ACTIVATED, PLEASE ACTIVATE FROM EMAIL"}'
-                resp = Response(response=ret,status=500,mimetype="application/json")
+                ret = '{"status":"FAILED":"message":"ACCOUNT NOT ACTIVATED, PLEASE ACTIVATE FROM EMAIL"}'
+                resp = Response(response=ret,status=200,mimetype="application/json")
                 return resp
             token = generateToken()
             headers = {}
             headers['appToken']=token
-            ret = '{"status":"success"}'
+            ret = '{"status":"SUCCESS"}'
             resp = Response(response=ret,status=200,mimetype="application/json",headers=headers)            
             return resp
         else :
-            ret = '{"status":"INVALID PASSWORD / USER"}'
-            resp = Response(response=ret,status=500,mimetype="application/json")
+            ret = '{"status":"FAILED":"message":"INVALID PASSWORD / USER"}'
+            resp = Response(response=ret,status=200,mimetype="application/json")
             return resp
     else:
-        ret = '{"status":"INVALID PASSWORD / USER"}'
-        resp = Response(response=ret,status=500,mimetype="application/json")
+        ret = '{"status":"FAILED":"message":"INVALID PASSWORD / USER"}'
+        resp = Response(response=ret,status=200,mimetype="application/json")
         return resp
 
 @app.route('/account/register',methods=['POST'])
@@ -74,11 +74,11 @@ def register():
     try:
         user.save()
     except NotUniqueError as e:
-        ret = '{"status":"USER ALREADY REGISTERED"}'
-        return Response(response=ret,status=500,mimetype="application/json")
+        ret = '{"status":"FAILED":"message":"USER ALREADY REGISTERED"}'
+        return Response(response=ret,status=200,mimetype="application/json")
     except ValidationError as email:
-        ret = '{"status":"EMAIL VALIDATION ERROR"}'
-        return Response(response=ret,status=500,mimetype="application/json")
+        ret = '{"status":"FAILED":"message":"EMAIL VALIDATION ERROR"}'
+        return Response(response=ret,status=200,mimetype="application/json")
     # Create and save a temp token
     session = Session(user.id)
     session.save()
@@ -86,8 +86,8 @@ def register():
     # Shoot a registration email
     sendRegistraionEmail(user,token)
     # Return a response
-    ret = '{"status":"User Registered Successfully"}'
-    return Response(response=ret,status=201,mimetype="application/json")
+    ret = '{"status":"SUCCESS":"message":"User Registered Successfully"}'
+    return Response(response=ret,status=200,mimetype="application/json")
 
 
 @app.route('/account/specialities')
