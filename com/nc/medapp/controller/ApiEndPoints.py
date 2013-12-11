@@ -44,6 +44,7 @@ def login():
             if user.enabled == False:
                 ret = '{"status":"ACCOUNT NOT ACTIVATED, PLEASE ACTIVATE FROM EMAIL"}'
                 resp = Response(response=ret,status=500,mimetype="application/json")
+                return resp
             token = generateToken()
             headers = {}
             headers['appToken']=token
