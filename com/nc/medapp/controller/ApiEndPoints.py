@@ -42,7 +42,7 @@ def login():
     if user:
         if user.password == password :
             if user.enabled == False:
-                ret = '{"status":"FAILED":"message":"ACCOUNT NOT ACTIVATED, PLEASE ACTIVATE FROM EMAIL"}'
+                ret = '{"status":"FAILED","message":"ACCOUNT NOT ACTIVATED, PLEASE ACTIVATE FROM EMAIL"}'
                 resp = Response(response=ret,status=200,mimetype="application/json")
                 return resp
             token = generateToken()
@@ -52,11 +52,11 @@ def login():
             resp = Response(response=ret,status=200,mimetype="application/json",headers=headers)            
             return resp
         else :
-            ret = '{"status":"FAILED":"message":"INVALID PASSWORD / USER"}'
+            ret = '{"status":"FAILED","message":"INVALID PASSWORD / USER"}'
             resp = Response(response=ret,status=200,mimetype="application/json")
             return resp
     else:
-        ret = '{"status":"FAILED":"message":"INVALID PASSWORD / USER"}'
+        ret = '{"status":"FAILED","message":"INVALID PASSWORD / USER"}'
         resp = Response(response=ret,status=200,mimetype="application/json")
         return resp
 
@@ -74,10 +74,10 @@ def register():
     try:
         user.save()
     except NotUniqueError as e:
-        ret = '{"status":"FAILED":"message":"USER ALREADY REGISTERED"}'
+        ret = '{"status":"FAILED","message":"USER ALREADY REGISTERED"}'
         return Response(response=ret,status=200,mimetype="application/json")
     except ValidationError as email:
-        ret = '{"status":"FAILED":"message":"EMAIL VALIDATION ERROR"}'
+        ret = '{"status":"FAILED","message":"EMAIL VALIDATION ERROR"}'
         return Response(response=ret,status=200,mimetype="application/json")
     # Create and save a temp token
     session = Session(user.id)
@@ -86,7 +86,7 @@ def register():
     # Shoot a registration email
     sendRegistraionEmail(user,token)
     # Return a response
-    ret = '{"status":"SUCCESS":"message":"User Registered Successfully"}'
+    ret = '{"status":"SUCCESS","message":"User Registered Successfully"}'
     return Response(response=ret,status=200,mimetype="application/json")
 
 
@@ -131,7 +131,7 @@ def sendRegistraionEmail(user,token):
     mailUser = {}
     mailUser['name'] = user.name
     mailUser['token'] = token
-    mailer.send_email("Hello World", [user.email], render_template("register.tmpl",user=mailUser), render_template("register.tmpl",user=mailUser))
+    mailer.send_email("Welcome to MED APP application", [user.email], render_template("register.tmpl",user=mailUser), render_template("register.tmpl",user=mailUser))
 
 
 def generateToken():
