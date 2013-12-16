@@ -23,10 +23,18 @@ class User(Document):
             msg = "No Kan ka doctor dost"
             raise ValidationError(msg)
 
+class Token(Document):
+    user = ReferenceField(User,required=True)
+    token = StringField(required=True)
 
 class Session(Document):
     user = ReferenceField(User)
     created =  DateTimeField(default=datetime.datetime.now())
+
+class Target(Document):
+    user = ReferenceField(User)
+    startDate = DateTimeField(requried=True)
+    hours = IntegerField(required=True)
 
 class Event(Document):
     # TODO: This is where I define my event data object

@@ -11,7 +11,7 @@ from flask.ext.mail import Message
 from com.nc.medapp.util.Mailer import Mailer
 from com.nc.medapp.api.LoginResource import LoginResource
 from com.nc.medapp.config import *
-from com.nc.medapp.model.DBMapper import User,Speciality,Session
+from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target
 import json
 from mongoengine import *
 import string
@@ -42,22 +42,29 @@ def login():
     if user:
         if user.password == password :
             if user.enabled == False:
-                ret = '{"status":"FAILED","message":"ACCOUNT NOT ACTIVATED, PLEASE ACTIVATE FROM EMAIL"}'
-                resp = Response(response=ret,status=200,mimetype="application/json")
+                ret = '{"status":"Fail","message":"User not activated or not registered"}'
+                resp = Response(response=ret,status=401,mimetype="application/json")
                 return resp
             token = generateToken()
             headers = {}
             headers['appToken']=token
-            ret = '{"status":"SUCCESS"}'
+            token = Token(user = user,token=token)
+            try:
+                token.save()
+            except Exception as e:
+                ret = '{"status":"Fail","message":"Failed to save user token"}'
+                resp = Response(response=ret,status=500,mimetype="application/json",headers=headers)
+                return resp
+            ret = '{"status":"Success","message":"User Successfully LogIn"}'
             resp = Response(response=ret,status=200,mimetype="application/json",headers=headers)            
             return resp
         else :
-            ret = '{"status":"FAILED","message":"INVALID PASSWORD / USER"}'
-            resp = Response(response=ret,status=200,mimetype="application/json")
+            ret = '{"status":"Fail","message":"Invalid user / password"}'
+            resp = Response(response=ret,status=401,mimetype="application/json")
             return resp
     else:
-        ret = '{"status":"FAILED","message":"INVALID PASSWORD / USER"}'
-        resp = Response(response=ret,status=200,mimetype="application/json")
+        ret = '{"status":"Fail","message":"User not activated or not registered"}'
+        resp = Response(response=ret,status=401,mimetype="application/json")
         return resp
 
 @app.route('/account/register',methods=['POST'])
@@ -74,11 +81,11 @@ def register():
     try:
         user.save()
     except NotUniqueError as e:
-        ret = '{"status":"FAILED","message":"USER ALREADY REGISTERED"}'
-        return Response(response=ret,status=200,mimetype="application/json")
+        ret = '{"status":"Fail","message":"User Already Registered"}'
+        return Response(response=ret,status=401,mimetype="application/json")
     except ValidationError as email:
-        ret = '{"status":"FAILED","message":"EMAIL VALIDATION ERROR"}'
-        return Response(response=ret,status=200,mimetype="application/json")
+        ret = '{"status":"Fail","message":"Standard server errors : Invalid Email"}'
+        return Response(response=ret,status=401,mimetype="application/json")
     # Create and save a temp token
     session = Session(user.id)
     session.save()
@@ -86,7 +93,7 @@ def register():
     # Shoot a registration email
     sendRegistraionEmail(user,token)
     # Return a response
-    ret = '{"status":"SUCCESS","message":"User Registered Successfully"}'
+    ret = '{"status":"Success","message":"User Successfully Registered"}'
     return Response(response=ret,status=200,mimetype="application/json")
 
 
@@ -101,7 +108,8 @@ def getSpecialities():
 
 @app.route('/account/forgotPassword',methods=['POST'])
 def forgotPassword():
-    return "Forgot Password"
+    ret = '{"status":"Success","message":"Password has been sent to your mailbox"}'
+    return Response(response=ret,status=200,mimetype="application/json")
 
     
 @app.route('/account/activate/<token>')
@@ -120,7 +128,35 @@ def activate(token):
         
     return json.dumps([{"status":"Account activated successfully"}])
 
+@app.route('/user/targets',methods=['POST'])
+def setTargets():
+    user = validateSession(request)
+    validateJSON(request.json)
+    targetDate = request.json.get('startDate');
+    hours = request.json.get('hours');
+    target = Target(user = user, startDate = targetDate, hours = hours)
+    try:
+        target.save()
+    except Exception as e:
+        ret = '{"status":"Fail","message":"Standard server errors"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    ret = '{"status":"Success","message":"Target has been set now"}'
+    return Response(response=ret,status=200,mimetype="application/json")
+
+@app.route('/user/goals',methods=['POST'])
+def setGoals():
+    pass
+
 # Helper methods
+
+def validateSession(request):
+    appToken = request.headers.get('appToken')
+    if not appToken:
+        ret = '{"status":"Fail","message":"Please login"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    token = Token.objects(token=appToken).first()
+    return token.user
+
 def validateJSON(json):
     if not json:
         abort(401)
