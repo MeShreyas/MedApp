@@ -33,8 +33,8 @@ class Session(Document):
 
 class Target(Document):
     user = ReferenceField(User)
-    startDate = DateTimeField(requried=True)
-    hours = IntegerField(required=True)
+    startDate = DateTimeField(required=True)
+    hours = IntField(required=True)
 
 class Event(Document):
     # TODO: This is where I define my event data object

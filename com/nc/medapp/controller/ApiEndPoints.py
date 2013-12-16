@@ -11,7 +11,7 @@ from flask.ext.mail import Message
 from com.nc.medapp.util.Mailer import Mailer
 from com.nc.medapp.api.LoginResource import LoginResource
 from com.nc.medapp.config import *
-from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target
+from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target, Token
 import json
 from mongoengine import *
 import string
