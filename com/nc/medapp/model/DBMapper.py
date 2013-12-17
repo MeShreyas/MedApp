@@ -31,10 +31,16 @@ class Session(Document):
     user = ReferenceField(User)
     created =  DateTimeField(default=datetime.datetime.now())
 
+class Goal(EmbeddedDocument):
+    goalNumber = IntField(required=True)
+    goalDesc = StringField(required=True)
+    
+
 class Target(Document):
     user = ReferenceField(User)
     startDate = DateTimeField(required=True)
     hours = IntField(required=True)
+    goals = ListField(EmbeddedDocumentField(Goal))
 
 class Event(Document):
     # TODO: This is where I define my event data object

@@ -11,7 +11,8 @@ from flask.ext.mail import Message
 from com.nc.medapp.util.Mailer import Mailer
 from com.nc.medapp.api.LoginResource import LoginResource
 from com.nc.medapp.config import *
-from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target, Token
+from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target, Token,\
+    Goal
 import json
 from mongoengine import *
 import string
@@ -131,6 +132,9 @@ def activate(token):
 @app.route('/user/targets',methods=['POST'])
 def setTargets():
     user = validateSession(request)
+    if not user:
+        ret = '{"status":"Fail","message":"Please login"}'
+        return Response(response=ret,status=401,mimetype="application/json")
     validateJSON(request.json)
     targetDate = request.json.get('startDate');
     hours = request.json.get('hours');
@@ -140,20 +144,64 @@ def setTargets():
     except Exception as e:
         ret = '{"status":"Fail","message":"Standard server errors"}'
         return Response(response=ret,status=401,mimetype="application/json")
-    ret = '{"status":"Success","message":"Target has been set now"}'
+    ret = '{"status":"Success","message":"Target has been set now","target":"'+str(target.id)+'"}'
     return Response(response=ret,status=200,mimetype="application/json")
 
-@app.route('/user/goals',methods=['POST'])
-def setGoals():
-    pass
+
+
+@app.route('/user/targets/<target>',methods=['GET'])
+def getTargets(target):
+    user = validateSession(request)
+    if not user:
+        ret = '{"status":"Fail","message":"Please login"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    targetObj = Target.objects(id=target).first()
+    if targetObj:
+        response = {}
+        response['startDate'] = str(targetObj.startDate)
+        response['hours'] = targetObj.hours
+        goals =[]
+        if targetObj.goals :            
+            for goal in targetObj.goals:
+                t_goal={}
+                t_goal['desc'] = goal.goalDesc;
+                t_goal['number'] = goal.goalNumber;
+                goals.append(t_goal)
+        if goals:
+            response['goals']=goals
+    ret = json.dumps(response)
+    return Response(response=ret,status=200,mimetype="application/json")
+
+
+@app.route('/user/goals/<target>',methods=['POST'])
+def setGoals(target):
+    user = validateSession(request)
+    if not user:
+        ret = '{"status":"Fail","message":"Please login"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    validateJSON(request.json)
+    goals = request.json.get('goals');
+    goalList = []
+    for goal in goals :
+        g = Goal(goalNumber = goal['number'],goalDesc=goal['desc'])
+        goalList.append(g)
+    targetObj = Target.objects(id=target).first()
+    targetObj.goals = goalList
+    try :
+        targetObj.save()
+    except Exception as e:
+        ret = '{"status":"Fail","message":"Standard server errors"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    ret = '{"status":"Success","message":"Goals have been set now"}'
+    return Response(response=ret,status=200,mimetype="application/json")
+    
 
 # Helper methods
 
 def validateSession(request):
     appToken = request.headers.get('appToken')
     if not appToken:
-        ret = '{"status":"Fail","message":"Please login"}'
-        return Response(response=ret,status=401,mimetype="application/json")
+        return None
     token = Token.objects(token=appToken).first()
     return token.user
 
