@@ -10,12 +10,13 @@ from flask.ext.mail import Mail
 from flask.ext.mail import Message
 from com.nc.medapp.util.Mailer import Mailer
 from com.nc.medapp.api.LoginResource import LoginResource
+import dateutil.parser
 from com.nc.medapp.config import *
 from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target, Token,\
     Goal
 import json
 from mongoengine import *
-import string
+import string   
 import random
 
 
@@ -136,7 +137,7 @@ def setTargets():
         ret = '{"status":"Fail","message":"Please login"}'
         return Response(response=ret,status=401,mimetype="application/json")
     validateJSON(request.json)
-    targetDate = request.json.get('startDate');
+    targetDate = dateutil.parser.parse(request.json.get('startDate'));
     hours = request.json.get('hours');
     target = Target(user = user, startDate = targetDate, hours = hours)
     try:
@@ -158,7 +159,7 @@ def getTargets(target):
     targetObj = Target.objects(id=target).first()
     if targetObj:
         response = {}
-        response['startDate'] = str(targetObj.startDate)
+        response['startDate'] = targetObj.startDate
         response['hours'] = targetObj.hours
         goals =[]
         if targetObj.goals :            
