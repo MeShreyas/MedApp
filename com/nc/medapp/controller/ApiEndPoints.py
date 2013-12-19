@@ -159,7 +159,7 @@ def getTargets(target):
     targetObj = Target.objects(id=target).first()
     if targetObj:
         response = {}
-        response['startDate'] = targetObj.startDate
+        response['startDate'] = targetObj.startDate.isoformat()
         response['hours'] = targetObj.hours
         goals =[]
         if targetObj.goals :            
