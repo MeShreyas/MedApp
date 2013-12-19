@@ -204,7 +204,10 @@ def validateSession(request):
     if not appToken:
         return None
     token = Token.objects(token=appToken).first()
-    return token.user
+    if token and token.user:
+        return token.user
+    else:
+        return None
 
 def validateJSON(json):
     if not json:
