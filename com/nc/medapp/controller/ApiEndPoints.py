@@ -53,7 +53,7 @@ def login():
             token = Token(user = user,token=token)
             try:
                 token.save()
-            except Exception as e:
+            except Exception, e:
                 ret = '{"status":"Fail","message":"Failed to save user token"}'
                 resp = Response(response=ret,status=500,mimetype="application/json",headers=headers)
                 return resp
@@ -62,7 +62,9 @@ def login():
             return resp
         else :
             ret = '{"status":"Fail","message":"Invalid user / password"}'
-            resp = Response(response=ret,status=401,mimetype="application/json")
+            headers={}
+            headers['WWW-Authenticate'] ='Some_Challenge_Here'
+            resp = Response(response=ret,status=401,mimetype="application/json",headers=headers)
             return resp
     else:
         ret = '{"status":"Fail","message":"User not activated or not registered"}'
