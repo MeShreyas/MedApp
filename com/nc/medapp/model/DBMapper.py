@@ -42,8 +42,14 @@ class Target(Document):
     hours = IntField(required=True)
     goals = ListField(EmbeddedDocumentField(Goal))
 
-class Event(Document):
-    # TODO: This is where I define my event data object
-    pass
+class Eventtype(Document):
+    eventType = StringField(required=True)
 
+class Event(Document):
+    user = ReferenceField(User)
+    startDate = DateTimeField(required=True)
+    endDate = DateTimeField(required=True)
+    eventType = ReferenceField(Eventtype,required=True)
+    title = StringField(required=True)
+    hours = IntField(required=True)
 

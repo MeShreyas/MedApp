@@ -13,11 +13,12 @@ from com.nc.medapp.api.LoginResource import LoginResource
 import dateutil.parser
 from com.nc.medapp.config import *
 from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target, Token,\
-    Goal
+    Goal,Eventtype, Event
 import json
 from mongoengine import *
 import string   
 import random
+from com.nc.medapp.exception.ValueError import MedAppValueError
 
 
 app = Flask("MedApp")
@@ -32,6 +33,126 @@ app.config.update(dict(
      MAIL_PASSWORD = 'CounterStrike@123',
  ))
 mail = Mail(app)
+
+
+@app.route('/eventTypes',methods=['GET'])
+def getEventTypes():
+    eventTypes = Eventtype.objects
+    temp_list=[]
+    for eventType in eventTypes:
+        temp_list.append(eventType.eventType)    
+    return json.dumps(temp_list) 
+
+@app.route('/events',methods=['POST'])
+def createEvent():
+    validateJSON(request.json)
+    user = validateSession(request)
+    if not user:
+        ret = '{"status":"Fail","message":"Please login"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    
+    try:        
+        startDate = dateutil.parser.parse(request.json.get('startDate'))
+        if not startDate:
+            raise MedAppValueError('StartDate is required')
+        endDate = dateutil.parser.parse(request.json.get('endDate'))
+        if not endDate:
+            raise MedAppValueError('EndDate is required')
+        eventType = request.json.get('eventType')
+        if not eventType:
+            raise MedAppValueError('EventType is required')
+        title = request.json.get('title')
+        if not title:
+            raise MedAppValueError('Title is required')
+        hours = request.json.get('hours')
+        if not hours:
+            raise MedAppValueError('Hours is required')
+        
+        # Fetch the event type object
+        eventTypeObj = Eventtype.objects(eventType=eventType).first()
+        if not eventTypeObj:
+            raise MedAppValueError('Invalid event type')
+        
+        event = Event(user=user,startDate=startDate,endDate=endDate,eventType=eventTypeObj,title=title,hours=hours)
+        event.save()
+        ret = '{"status":"Success","message":"Event has been created","eventId":"'+str(event.id)+'"}'
+        return Response(response=ret,status=200,mimetype="application/json")
+    except MedAppValueError as e :
+        ret = '{"status":"Fail","message":"'+str(e)+'"}'
+        resp = Response(response=ret,status=500,mimetype="application/json")
+        return resp
+    except Exception as e:
+        ret = '{"status":"Fail","message":"Failed to create event '+str(e)+'"}'
+        resp = Response(response=ret,status=500,mimetype="application/json")
+        return resp
+    
+
+@app.route('/events/<eventId>',methods=['PUT'])
+def updateEvent(eventId):
+    validateJSON(request.json)
+    user = validateSession(request)
+    if not user:
+        ret = '{"status":"Fail","message":"Please login"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    
+    try:
+        # Fetch the event based on id
+        if not eventId:
+            ret = '{"status":"Fail","message":"No Event Id Specified"}'
+            return Response(response=ret,status=500,mimetype="application/json")
+        
+        try:
+            event = Event.objects(id=eventId).first()
+            if not event:
+                raise
+        except Exception as e:
+            ret = '{"status":"Fail","message":"Invalid Event Id Specified"}'
+            return Response(response=ret,status=500,mimetype="application/json")
+                
+        if request.json.get('startDate'):
+            startDate = dateutil.parser.parse(request.json.get('startDate'))
+            if startDate:
+                event.startDate = startDate
+        if request.json.get('endDate'):
+            endDate = dateutil.parser.parse(request.json.get('endDate'))
+            if endDate:
+                event.endDate = endDate
+        eventType = request.json.get('eventType')
+        if eventType:
+            eventTypeObj = Eventtype.objects(eventType=eventType).first()
+            if not eventTypeObj:
+                raise MedAppValueError('Invalid event type')
+            event.eventType = eventTypeObj
+        title = request.json.get('title')        
+        if title:
+            event.title = title
+        hours = request.json.get('hours')
+        if hours:
+            event.hours = hours
+            
+        event.save()
+        ret = '{"status":"Success","message":"Event has been updated","eventId":"'+str(event.id)+'"}'
+        return Response(response=ret,status=200,mimetype="application/json")
+    except MedAppValueError as e :
+        ret = '{"status":"Fail","message":"'+str(e)+'"}'
+        resp = Response(response=ret,status=500,mimetype="application/json")
+        return resp
+    except Exception as e:
+        ret = '{"status":"Fail","message":"Failed to update event '+str(e)+'"}'
+        resp = Response(response=ret,status=500,mimetype="application/json")
+        return resp
+    
+@app.route('/events/<id>',methods=['GET'])
+def getEvent(eventId):
+    pass
+
+@app.route('/events',methods=['GET'])
+def getEvents():
+    pass
+
+
+
+
 
 
 ############### ACCOUNT API'S ############### 
@@ -63,7 +184,7 @@ def login():
         else :
             ret = '{"status":"Fail","message":"Invalid user / password"}'
             headers={}
-            headers['WWW-Authenticate'] ='Some_Challenge_Here'
+            headers['WWW-Authenticate'] ='OAuth realm="NirmanCraft"'
             resp = Response(response=ret,status=401,mimetype="application/json",headers=headers)
             return resp
     else:
