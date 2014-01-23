@@ -8,7 +8,6 @@ from flask import Flask
 from flask import request,abort,render_template,Response
 from flask.ext.mail import Mail
 from flask.ext.mail import Message
-from flask.ext.uploads import UploadSet,configure_uploads,IMAGES
 from com.nc.medapp.util.Mailer import Mailer
 import dateutil.parser
 from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target, Token,\
@@ -17,9 +16,9 @@ import json
 from mongoengine import *
 import string   
 import random
-import cStringIO as StringIO
 from com.nc.medapp.exception.ValueError import MedAppValueError
-from werkzeug.datastructures import FileStorage
+import os
+
 
 UPLOADS_FOLDER='/tmp'
 ALLOWED_EXTENSIONS = set(['jpg','jpeg','png','gif'])
@@ -35,9 +34,6 @@ app.config.update(dict(
      MAIL_PASSWORD = 'CounterStrike@123',
  ))
 app.config['UPLOADS_DEFAULT_DEST']=UPLOADS_FOLDER
-photos = UploadSet('photos', IMAGES)
-
-configure_uploads(app,photos)
 mail = Mail(app)
 
 
@@ -63,15 +59,20 @@ def uploadPhoto(eventId):
             return Response(response=ret,status=500,mimetype="application/json")
         
         if request.method == 'POST' and request.data:
-            filename = photos.save(FileStorage(stream=request.data))
-            return "Done"
+            file = request.data;
+            filetype = file[file.index('/')+1:file.index(';base64,')]
+            file=file[file.index(',')+1:]
+            fh = open(UPLOADS_FOLDER+os.sep+str(user.id)+"."+filetype, "wb")
+            fh.write(file.decode('base64'))
+            fh.close()
         
     except Exception as e:
-        ret = '{"status":"Fail","message":"Failed to create event '+str(e)+'"}'
+        ret = '{"status":"Fail","message":"Failed to upload photo"}'
         resp = Response(response=ret,status=500,mimetype="application/json")
         return resp
         
-    
+    ret = '{"status":"Success","message":"Image Upload Complete"}'
+    return Response(response=ret,status=200,mimetype="application/json")
     
 
 @app.route('/eventTypes',methods=['GET'])
