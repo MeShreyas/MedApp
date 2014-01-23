@@ -8,23 +8,25 @@ from flask import Flask
 from flask import request,abort,render_template,Response
 from flask.ext.mail import Mail
 from flask.ext.mail import Message
+from flask.ext.uploads import UploadSet,configure_uploads,IMAGES
 from com.nc.medapp.util.Mailer import Mailer
-from com.nc.medapp.api.LoginResource import LoginResource
 import dateutil.parser
-from com.nc.medapp.config import *
 from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target, Token,\
     Goal,Eventtype, Event
 import json
 from mongoengine import *
 import string   
 import random
+import cStringIO as StringIO
 from com.nc.medapp.exception.ValueError import MedAppValueError
+from werkzeug.datastructures import FileStorage
 
+UPLOADS_FOLDER='/tmp'
+ALLOWED_EXTENSIONS = set(['jpg','jpeg','png','gif'])
 
 app = Flask("MedApp")
 connect('test')
 app.config.update(dict(
-     DEBUG = True,
      MAIL_SERVER = 'smtp.gmail.com',
      MAIL_PORT = 587,
      MAIL_USE_TLS = True,
@@ -32,8 +34,45 @@ app.config.update(dict(
      MAIL_USERNAME = 'simplychampak@gmail.com',
      MAIL_PASSWORD = 'CounterStrike@123',
  ))
+app.config['UPLOADS_DEFAULT_DEST']=UPLOADS_FOLDER
+photos = UploadSet('photos', IMAGES)
+
+configure_uploads(app,photos)
 mail = Mail(app)
 
+
+@app.route('/uploadPhoto/<eventId>',methods=['POST'])
+def uploadPhoto(eventId):
+    user = validateSession(request)
+    if not user:
+        ret = '{"status":"Fail","message":"Please login"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    
+    try:
+        # Fetch the event based on id
+        if not eventId:
+            ret = '{"status":"Fail","message":"No Event Id Specified"}'
+            return Response(response=ret,status=500,mimetype="application/json")
+        
+        try:
+            event = Event.objects(id=eventId).first()
+            if not event:
+                raise
+        except Exception as e:
+            ret = '{"status":"Fail","message":"Invalid Event Id Specified"}'
+            return Response(response=ret,status=500,mimetype="application/json")
+        
+        if request.method == 'POST' and request.data:
+            filename = photos.save(FileStorage(stream=request.data))
+            return "Done"
+        
+    except Exception as e:
+        ret = '{"status":"Fail","message":"Failed to create event '+str(e)+'"}'
+        resp = Response(response=ret,status=500,mimetype="application/json")
+        return resp
+        
+    
+    
 
 @app.route('/eventTypes',methods=['GET'])
 def getEventTypes():
