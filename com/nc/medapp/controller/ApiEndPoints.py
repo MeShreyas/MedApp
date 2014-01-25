@@ -20,7 +20,7 @@ from com.nc.medapp.exception.ValueError import MedAppValueError
 import os
 
 
-UPLOADS_FOLDER='/tmp'
+UPLOADS_FOLDER='/MedApp/images'
 ALLOWED_EXTENSIONS = set(['jpg','jpeg','png','gif'])
 
 app = Flask("MedApp")
@@ -39,6 +39,8 @@ mail = Mail(app)
 
 @app.route('/uploadPhoto/<eventId>',methods=['POST'])
 def uploadPhoto(eventId):
+    photos = []
+    accessUrl = ""
     user = validateSession(request)
     if not user:
         ret = '{"status":"Fail","message":"Please login"}'
@@ -54,6 +56,9 @@ def uploadPhoto(eventId):
             event = Event.objects(id=eventId).first()
             if not event:
                 raise
+            photos = event.photos
+            if not photos:
+                photos=[]
         except Exception as e:
             ret = '{"status":"Fail","message":"Invalid Event Id Specified"}'
             return Response(response=ret,status=500,mimetype="application/json")
@@ -62,16 +67,23 @@ def uploadPhoto(eventId):
             file = request.data;
             filetype = file[file.index('/')+1:file.index(';base64,')]
             file=file[file.index(',')+1:]
-            fh = open(UPLOADS_FOLDER+os.sep+str(user.id)+"."+filetype, "wb")
+            userid = str(user.id)
+            filename=userid[:5]+generateToken()+"."+filetype
+            fh = open(UPLOADS_FOLDER+os.sep+filename, "wb")
             fh.write(file.decode('base64'))
             fh.close()
+            event.photos.append(filename)
+            event.save()
+            accessUrl = str(request.host_url)+"images/"+filename
+        else:
+            raise 
         
     except Exception as e:
         ret = '{"status":"Fail","message":"Failed to upload photo"}'
         resp = Response(response=ret,status=500,mimetype="application/json")
         return resp
         
-    ret = '{"status":"Success","message":"Image Upload Complete"}'
+    ret = '{"status":"Success","message":"Image Upload Complete","url:"'+accessUrl+'"}'
     return Response(response=ret,status=200,mimetype="application/json")
     
 

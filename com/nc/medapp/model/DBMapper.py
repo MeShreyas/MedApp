@@ -52,4 +52,5 @@ class Event(Document):
     eventType = ReferenceField(Eventtype,required=True)
     title = StringField(required=True)
     hours = IntField(required=True)
+    photos = ListField()
 
