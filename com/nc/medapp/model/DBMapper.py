@@ -39,7 +39,7 @@ class Goal(EmbeddedDocument):
 class Target(Document):
     user = ReferenceField(User)
     startDate = DateTimeField(required=True)
-    hours = IntField(required=True)
+    hours = DecimalField(required=True)
     goals = ListField(EmbeddedDocumentField(Goal))
 
 class Eventtype(Document):
@@ -51,6 +51,7 @@ class Event(Document):
     endDate = DateTimeField(required=True)
     eventType = ReferenceField(Eventtype,required=True)
     title = StringField(required=True)
-    hours = IntField(required=True)
+    hours = DecimalField(required=True)
     photos = ListField()
+    notes = StringField()
 
