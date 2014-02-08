@@ -84,7 +84,6 @@ def getFriendList():
         ret = '{"status":"Fail","message":"Please login"}'
         return Response(response=ret,status=401,mimetype="application/json")
     try:
-        user = User.objects(id=user).first()
         friendList=[]
         if user.friends:
             for f in user.friends:

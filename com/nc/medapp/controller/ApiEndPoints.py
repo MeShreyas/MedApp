@@ -88,7 +88,32 @@ def login():
 
 @app.route('/account/register',methods=['POST'])
 def register():
-    return LoginResource.register();
+    validateJSON(request.json)
+    name = request.json.get('name')
+    email = request.json.get('email')
+    password = request.json.get('password')
+    speciality = request.json.get('speciality')
+    # Fetch speciality object reference
+    spec = Speciality.objects(fieldname=speciality).first()
+    # Create a user object and save to DB
+    user = User(name=name,email=email,password=password,speciality=spec.id)
+    try:
+        user.save()
+    except NotUniqueError as e:
+        ret = '{"status":"Fail","message":"User Already Registered"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    except ValidationError as email:
+        ret = '{"status":"Fail","message":"Standard server errors : Invalid Email"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    # Create and save a temp token
+    session = Session(user.id)
+    session.save()
+    token = str(session.id)
+    # Shoot a registration email
+    sendRegistraionEmail(user,token)
+    # Return a response
+    ret = '{"status":"Success","message":"User Successfully Registered"}'
+    return Response(response=ret,status=200,mimetype="application/json")
 
 @app.route('/account/specialities')
 def getSpecialities():

@@ -10,7 +10,7 @@ from com.nc.medapp.model.DBMapper import User, Speciality, Session, Token
 from com.nc.medapp.exception.ValueError import MedAppValueError
 from mongoengine import *
 from com.nc.medapp.util.Helper import validateJSON, generateToken
-
+import json
 
 def login():
     validateJSON(request.json)
