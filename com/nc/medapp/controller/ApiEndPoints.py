@@ -27,12 +27,16 @@ ALLOWED_EXTENSIONS = set(['jpg','jpeg','png','gif'])
 app = Flask("MedApp")
 connect('test')
 app.config.update(dict(
-     MAIL_SERVER = 'smtp.gmail.com',
-     MAIL_PORT = 587,
-     MAIL_USE_TLS = True,
-     MAIL_USE_SSL = False,
-     MAIL_USERNAME = 'simplychampak@gmail.com',
-     MAIL_PASSWORD = 'CounterStrike@123',
+     #MAIL_SERVER = 'smtp.gmail.com',
+     MAIL_SERVER = 'smtpout.secureserver.net',
+     #MAIL_PORT = 587,
+     MAIL_PORT = 465,
+     #EMAIL_USE_TLS = False,
+     MAIL_USE_SSL = True,
+     MAIL_USERNAME = 'support@shared-health.co.uk',
+     #MAIL_USERNAME = 'simplychampak@gmail.com',
+     #MAIL_PASSWORD = 'CounterStrike@123',
+     MAIL_PASSWORD = 'Mysore1234',
  ))
 #app.config['UPLOADS_DEFAULT_DEST']=UPLOADS_FOLDER
 mail = Mail(app)
@@ -169,8 +173,6 @@ def getFriendList():
 @app.route('/friends/invite/<email>',methods=['GET'])
 def inviteUser(email):
     pass
-
-
 
 
 def sendRegistraionEmail(user,token):

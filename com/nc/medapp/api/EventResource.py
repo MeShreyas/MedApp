@@ -68,7 +68,7 @@ def getEvents():
     temp_list=[]
     for event in events:
         temp_eve = {}
-        temp_eve['name'] = event.title
+        temp_eve['title'] = event.title
         temp_eve['id'] = str(event.id)
         temp_eve['startDate'] = event.startDate.isoformat()
         temp_eve['endDate'] = event.endDate.isoformat()
@@ -156,7 +156,7 @@ def getEvent(eventId):
         return Response(response=ret,status=500,mimetype="application/json")
     
     temp_eve = {}
-    temp_eve['name'] = event.title
+    temp_eve['title'] = event.title
     temp_eve['id'] = str(event.id)
     temp_eve['startDate'] = event.startDate.isoformat()
     temp_eve['endDate'] = event.endDate.isoformat()
