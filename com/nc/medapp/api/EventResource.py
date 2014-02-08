@@ -74,6 +74,7 @@ def getEvents():
         temp_eve['endDate'] = event.endDate.isoformat()
         temp_eve['hours']=str(event.hours)
         temp_list.append(temp_eve)
+    print temp_list
     return json.dumps(temp_list) 
 
 def updateEvent(eventId):

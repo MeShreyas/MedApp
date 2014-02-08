@@ -59,7 +59,7 @@ def uploadPhoto(eventId):
         resp = Response(response=ret,status=500,mimetype="application/json")
         return resp
         
-    ret = '{"status":"Success","message":"Image Upload Complete","url:"'+accessUrl+'"}'
+    ret = '{"status":"Success","message":"Image Upload Complete","url":"'+accessUrl+'"}'
     return Response(response=ret,status=200,mimetype="application/json")
 
 if __name__ == '__main__':
