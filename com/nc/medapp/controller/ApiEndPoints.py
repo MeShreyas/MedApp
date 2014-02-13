@@ -25,7 +25,7 @@ UPLOADS_FOLDER='/MedApp/images'
 ALLOWED_EXTENSIONS = set(['jpg','jpeg','png','gif'])
 
 app = Flask("MedApp")
-connect('test')
+connect('test',tz_aware = True)
 app.config.update(dict(
      #MAIL_SERVER = 'smtp.gmail.com',
      MAIL_SERVER = 'smtpout.secureserver.net',
