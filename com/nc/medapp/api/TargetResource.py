@@ -47,7 +47,7 @@ def getTargets():
             for goal in obj.goals:
                 t_goal={}
                 t_goal['desc'] = goal.goalDesc;
-                t_goal['number'] = goal.goalNumber;
+                t_goal['number'] = goal.goalNumber; 
                 goals.append(t_goal)
         if goals:
             response['goals']=goals
