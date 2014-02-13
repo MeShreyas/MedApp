@@ -73,8 +73,27 @@ def getEvents():
         temp_eve['startDate'] = event.startDate.isoformat()
         temp_eve['endDate'] = event.endDate.isoformat()
         temp_eve['hours']=str(event.hours)
+        temp_eve['photos'] = []
+        temp_eve['notes'] = event.notes
+        temp_eve['eventType'] = event.eventType.eventType
+        for photo in event.photos:
+            temp_eve['photos'].append(str(request.host_url)+"images/"+photo)
         temp_list.append(temp_eve)
-    print temp_list
+    
+#     
+#     temp_eve = {}
+#     temp_eve['title'] = event.title
+#     temp_eve['id'] = str(event.id)
+#     temp_eve['startDate'] = event.startDate.isoformat()
+#     temp_eve['endDate'] = event.endDate.isoformat()
+#     temp_eve['hours']=str(event.hours)
+#     temp_eve['photos'] = []
+#     temp_eve['notes'] = event.notes
+#     temp_eve['eventType'] = event.eventType.eventType
+#     for photo in event.photos:
+#         temp_eve['photos'].append(str(request.host_url)+"images/"+photo)
+#     
+    
     return json.dumps(temp_list) 
 
 def updateEvent(eventId):
@@ -163,6 +182,7 @@ def getEvent(eventId):
     temp_eve['hours']=str(event.hours)
     temp_eve['photos'] = []
     temp_eve['notes'] = event.notes
+    temp_eve['eventType'] = event.eventType.eventType
     for photo in event.photos:
         temp_eve['photos'].append(str(request.host_url)+"images/"+photo)
     
