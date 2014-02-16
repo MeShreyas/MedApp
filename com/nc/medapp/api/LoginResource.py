@@ -16,7 +16,7 @@ def login():
     validateJSON(request.json)
     email = request.json['email']
     password = request.json['password']
-    deviceToken = request.json['deviceToken']
+    deviceToken = request.json.get('deviceToken')
     user = User.objects(email=email).first()
     if user:
         if user.password == password :
