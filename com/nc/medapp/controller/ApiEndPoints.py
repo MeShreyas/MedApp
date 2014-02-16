@@ -11,7 +11,7 @@ from flask.ext.mail import Message
 from com.nc.medapp.util.Mailer import Mailer
 import dateutil.parser
 from com.nc.medapp.model.DBMapper import User,Speciality,Session, Target, Token,\
-    Goal,Eventtype, Event
+    Goal,Eventtype, Event, Country
 import json
 from mongoengine import *
 from com.nc.medapp.exception.ValueError import MedAppValueError
@@ -82,7 +82,14 @@ def getEventTypes():
         temp_list.append(eventType.eventType)    
     return json.dumps(temp_list) 
 
-
+############### COUNTRY API'S ###############
+@app.route('/country')
+def getCountries():
+    countries = Country.objects
+    countryList = []
+    for country in countries :
+        countryList.append(country.name)
+    return json.dumps(countryList)
 
 
 ############### ACCOUNT API'S ############### 
@@ -97,10 +104,13 @@ def register():
     email = request.json.get('email')
     password = request.json.get('password')
     speciality = request.json.get('speciality')
+    country = request.json.get('country')
     # Fetch speciality object reference
     spec = Speciality.objects(fieldname=speciality).first()
+    #Fetch Country
+    country = Country.objects(name=country).first()
     # Create a user object and save to DB
-    user = User(name=name,email=email,password=password,speciality=spec.id)
+    user = User(name=name,email=email,password=password,speciality=spec.id,country=country)
     try:
         user.save()
     except NotUniqueError as e:

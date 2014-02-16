@@ -16,6 +16,7 @@ def login():
     validateJSON(request.json)
     email = request.json['email']
     password = request.json['password']
+    deviceToken = request.json['deviceToken']
     user = User.objects(email=email).first()
     if user:
         if user.password == password :
@@ -24,6 +25,13 @@ def login():
                 resp = Response(response=ret,status=401,mimetype="application/json")
                 return resp
             token = generateToken()
+            if deviceToken :
+                existToken = Devicetoken(user=user.id).first()
+                if existToken :
+                    existToken['token'] = deviceToken
+                else :
+                    existToken = Devicetoken(user = user.id, token=deviceToken)
+                existToken.save()
             headers = {}
             headers['appToken']=token
             token = Token(user = user,token=token)

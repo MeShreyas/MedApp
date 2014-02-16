@@ -8,12 +8,16 @@ import datetime
 
 class Speciality(Document):
     fieldname = StringField(required=True)
+    
+class Country(Document):
+    name = StringField(required=True)
 
 class User(Document):
     name = StringField(required=True)
     email = EmailField(required=True,unique=True)
     password = StringField(required=True)
     speciality = ReferenceField(Speciality,required=True)
+    country = ReferenceField(Country, required=False)
     friends = ListField(StringField())
     enabled = BooleanField(default=False,required=True)
     created = DateTimeField(default=datetime.datetime.now())
@@ -54,4 +58,6 @@ class Event(Document):
     hours = DecimalField(required=True)
     photos = ListField()
     notes = StringField()
+    
+
 
