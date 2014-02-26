@@ -58,6 +58,7 @@ class Event(Document):
     hours = DecimalField(required=True)
     photos = ListField()
     notes = StringField()
+    status = StringField()
     
 
 

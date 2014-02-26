@@ -30,6 +30,32 @@ def setTargets():
     return Response(response=ret,status=200,mimetype="application/json")
 
 
+def updateTargets(target):
+    user = validateSession(request)
+    if not user:
+        ret = '{"status":"Fail","message":"Please login"}'
+        return Response(response=ret,status=401,mimetype="application/json")
+    targetObj = Target.objects(id=target).first()
+    if targetObj:
+        validateJSON(request.json)
+        targetDate = request.json.get('targetDate') 
+        if targetDate:
+            targetDate = dateutil.parser.parse(request.json.get('startDate'));
+            hours = request.json.get('hours');
+            target = Target(user = user, startDate = targetDate, hours = hours)
+            try:
+                target.save()
+            except Exception as e:
+                ret = '{"status":"Fail","message":"Standard server errors"}'
+                return Response(response=ret,status=401,mimetype="application/json")
+            ret = '{"status":"Success","message":"Target has been set now","target":"'+str(target.id)+'"}'
+            return Response(response=ret,status=200,mimetype="application/json")
+    else :
+        ret = '{"status":"Fail","message":"Event does not exist"}'
+        return Response(response=ret,status=500,mimetype="application/json")
+        
+
+
 def getTargets():
     user = validateSession(request)
     if not user:

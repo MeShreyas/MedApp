@@ -44,7 +44,7 @@ def createEvent():
         if not eventTypeObj:
             raise MedAppValueError('Invalid event type')
         
-        event = Event(user=user,startDate=startDate,endDate=endDate,eventType=eventTypeObj,title=title,hours=hours,notes=notes)
+        event = Event(user=user,startDate=startDate,endDate=endDate,eventType=eventTypeObj,title=title,hours=hours,notes=notes,status="Open")
         event.save()
         ret = '{"status":"Success","message":"Event has been created","eventId":"'+str(event.id)+'"}'
         return Response(response=ret,status=200,mimetype="application/json")
@@ -76,6 +76,7 @@ def getEvents():
         temp_eve['photos'] = []
         temp_eve['notes'] = event.notes
         temp_eve['eventType'] = event.eventType.eventType
+        temp_eve['status'] = event.status
         for photo in event.photos:
             temp_eve['photos'].append(str(request.host_url)+"images/"+photo)
         temp_list.append(temp_eve)
@@ -125,6 +126,7 @@ def updateEvent(eventId):
             endDate = dateutil.parser.parse(request.json.get('endDate'))
             if endDate:
                 event.endDate = endDate
+            
         eventType = request.json.get('eventType')
         if eventType:
             eventTypeObj = Eventtype.objects(eventType=eventType).first()
@@ -138,8 +140,15 @@ def updateEvent(eventId):
         if hours:
             event.hours = hours
         notes = request.json.get('notes')
-        if notes:
+        if notes and notes.strip().__len__()>0 :
             event.notes = event.notes+"||"+notes
+        elif notes :
+            event.notes = notes
+        
+        
+        status = request.json.get('status')
+        if status:
+            event.status = status
             
         event.save()
         ret = '{"status":"Success","message":"Event has been updated","eventId":"'+str(event.id)+'"}'
@@ -183,6 +192,7 @@ def getEvent(eventId):
     temp_eve['photos'] = []
     temp_eve['notes'] = event.notes
     temp_eve['eventType'] = event.eventType.eventType
+    temp_eve['status'] = event.status
     for photo in event.photos:
         temp_eve['photos'].append(str(request.host_url)+"images/"+photo)
     
