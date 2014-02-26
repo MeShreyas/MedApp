@@ -154,6 +154,10 @@ def activate(token):
 def setTargets():
     return TargetResource.setTargets()
 
+@app.route('/user/targets/<target>',methods=['PUT'])
+def updateTargets(target):
+    return TargetResource.updateTargets(target)
+
 @app.route('/user/targets',methods=['GET'])
 def getTargets():
     return TargetResource.getTargets()
