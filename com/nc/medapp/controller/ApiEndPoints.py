@@ -138,9 +138,9 @@ def getSpecialities():
     
     return json.dumps(temp_list.sort()) 
 
-@app.route('/account/forgotPassword',methods=['POST'])
-def forgotPassword():
-    user = UserResource.forgotPassword();
+@app.route('/account/forgotPassword/<email>',methods=['POST'])
+def forgotPassword(email):
+    user = UserResource.forgotPassword(email);
     if user:
         ret = '{"status":"Success","message":"Password has been sent to your mailbox"}'
     else:

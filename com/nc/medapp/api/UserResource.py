@@ -105,8 +105,8 @@ def getFriendList():
         return Response(response=ret,status=500,mimetype="application/json")
     
 
-def forgotPassword():
-    user = validateSession(request)
+def forgotPassword(email):
+    user = User.objects(email=email).first()
     if not user:
         return None
     else:
