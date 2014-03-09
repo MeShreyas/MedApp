@@ -104,3 +104,12 @@ def getFriendList():
         ret = '{"status":"Error","message":"Could not find friends"}'
         return Response(response=ret,status=500,mimetype="application/json")
     
+
+def forgotPassword():
+    user = validateSession(request)
+    if not user:
+        return None
+    else:
+        return user
+
+

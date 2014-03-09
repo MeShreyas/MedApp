@@ -136,11 +136,17 @@ def getSpecialities():
     for speciality in specialities:
         temp_list.append(speciality.fieldname)
     
-    return json.dumps(temp_list) 
+    return json.dumps(temp_list.sort()) 
 
 @app.route('/account/forgotPassword',methods=['POST'])
 def forgotPassword():
-    ret = '{"status":"Success","message":"Password has been sent to your mailbox"}'
+    user = UserResource.forgotPassword();
+    if user:
+        ret = '{"status":"Success","message":"Password has been sent to your mailbox"}'
+    else:
+        ret = '{"status":"Fail","message":"Could not send out password"}'
+    
+    sendForgotPasswordEmail(user)
     return Response(response=ret,status=200,mimetype="application/json")
     
 @app.route('/account/activate/<token>')
@@ -188,6 +194,13 @@ def getFriendList():
 def inviteUser(email):
     pass
 
+
+def sendForgotPasswordEmail(user):
+    mailer = Mailer(mail)
+    mailUser = {}
+    mailUser['name'] = user.name
+    mailUser['password'] = user.password
+    mailer.send_email("MED APP : Sending your password",[user.email], render_template("forgot_password.tmpl",user=mailUser),render_template("forgot_password.tmpl",user=mailUser))
 
 def sendRegistraionEmail(user,token):
     mailer = Mailer(mail)

@@ -50,7 +50,7 @@ def updateTargets(target):
         except Exception as e:
             ret = '{"status":"Fail","message":"Standard server errors"}'
             return Response(response=ret,status=401,mimetype="application/json")
-        ret = '{"status":"Success","message":"Target has been set now","target":"'+str(target.id)+'"}'
+        ret = '{"status":"Success","message":"Target has been set now","target":"'+str(targetObj.id)+'"}'
         return Response(response=ret,status=200,mimetype="application/json")
     else :
         ret = '{"status":"Fail","message":"Event does not exist"}'
